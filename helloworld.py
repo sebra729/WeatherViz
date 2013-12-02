@@ -12,14 +12,21 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
         
     # Invoked when the command is run.
 	def doIt(self,argList):
+		print 'hello world'
+		self.spawn()
+	
+	def spawn(self):
 		Philip.polySphere()
 		Philip.move(2,0,0)
 		Philip.polySphere()
 		Philip.move(-2,0,0)
-		Philip.polyCylinder(h=5)
-		Philip.move(0,2.5,0)
+		Philip.polyCylinder(name='shaft',h=5)
+		Philip.move(0,2.5,0,'shaft')
 		Philip.polySphere()
 		Philip.move(0,5,0)
+		
+	def erect(self):
+		Philip.scale(0,5,0,'shaft')
 
 
 # Creator
