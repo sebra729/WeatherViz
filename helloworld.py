@@ -12,7 +12,6 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
         
     # Invoked when the command is run.
 	def doIt(self,argList):
-		print 'hello world'
 		self.spawn()
 	
 	def spawn(self):
