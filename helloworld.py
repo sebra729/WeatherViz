@@ -28,7 +28,9 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 	def erect(self):
 		Philip.scale(0,5,0,'shaft')
 
-
+	def psphere(self):
+		Philip.scale(0,5,0,'shaft')
+		print 'eeeeeeeeeeeee'
 # Creator
 def cmdCreator():
 	return OpenMayaMPx.asMPxPtr( scriptedCommand() )
