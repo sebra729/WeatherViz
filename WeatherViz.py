@@ -5,10 +5,12 @@ import maya.cmds as c;
 
 
 def slider_drag_callback(*args):
-	value = c.floatSliderGrp('testSlider', query=True, value=True);
-	print value;
+	valueGravity = c.floatSliderGrp('testSlider', query=True, value=True);
+	#print valueGravity;
+	valueR = c.floatSliderGrp('slider', query=True, value=True);
 	
-	c.gravity('gravity', e=True, magnitude= value);
+	c.gravity('gravity', e=True, magnitude= valueGravity);
+	c.collision('flore', e=True, r= valueR);
 	'''
 	c.move(value,2.5,0,'shaft');
 	c.move(2 + value,0,0,'ball1');
@@ -89,10 +91,14 @@ class WeatherUI():
 	
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
-		c.formLayout(numberOfDivisions=10);
+		#form = c.formLayout(numberOfDivisions=10);
+		c.flowLayout(columnSpacing=10);
 		#c.textField();
 		#c.intSlider(min=-100,max=100,value=0,step=1,width=200);
-		c.floatSliderGrp('testSlider',label='Move Penis', field=True, value=0, dc=slider_drag_callback, min=-10, max=10);
+		c.floatSliderGrp('testSlider',label='Gravity', field=True, value=0, dc=slider_drag_callback, min=-10, max=10);
+		c.floatSliderGrp('slider',label='Collision Resilience', field=True, value=0.3, dc=slider_drag_callback, min=0, max=1);
+		
+		#c.formLayout(form, edit=True, attachForm=[(s1, 'top', 5), (s2, 5)]);
 		c.showWindow(window);
 		
 
