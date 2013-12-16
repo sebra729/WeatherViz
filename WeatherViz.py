@@ -79,18 +79,12 @@ class WeatherUI():
 		c.formLayout(numberOfDivisions=10);
 		#c.textField();
 		#c.intSlider(min=-100,max=100,value=0,step=1,width=200);
-		c.checkBox('snowCheck',label='Snow', onc=self.snowOn, ofc=self.snowOff);
+		c.checkBox('snowCheck',label='Snow', onc=self.snow.init, ofc=self.snow.remove);
 		c.showWindow(window);
 		
 	def setupSky(self):
 		c.polyPlane(h=30,w=30,n='emitPlane');
 		c.move(0,20,0,'emitPlane');
-		
-	def snowOn(self,*args):
-		self.snow.init();
-		
-	def snowOff(self,*args):
-		print 'remove';	
 	
 
 class Snow():
@@ -98,7 +92,7 @@ class Snow():
 	def __init__(self):
 		pass;
 	
-	def init(self):
+	def init(WeatherUI,self):
 		c.select('emitPlane');
 		c.emitter(n='snowEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='snowParticle');
@@ -110,6 +104,9 @@ class Snow():
 		c.connectDynamic('snowParticle',f='gravity');
 		c.connectDynamic('snowParticle',f='turb');
 		c.select(cl=True);
+		
+	def remove(WeatherUI,self):
+		print 'remove';
 
 class Rain():
 	
