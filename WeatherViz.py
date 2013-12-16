@@ -4,13 +4,7 @@ import maya.OpenMayaMPx as OpenMayaMPx;
 import maya.cmds as c;
 
 
-def slider_drag_callback(*args):
-	value = c.floatSliderGrp('testSlider', query=True, value=True);
-	print value;
-	c.move(value,2.5,0,'shaft');
-	c.move(2 + value,0,0,'ball1');
-	c.move(-2 + value,0,0,'ball2');
-	c.move(value,5,0,'glance');
+
 
 
 
@@ -31,9 +25,6 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 		weatherUI.init();
 		weatherUI.setupSky();
 		
-		snow = Snow();
-		snow.init();
-		
 	def penis(self):
 		c.polySphere(name='ball1');
 		c.move(2,0,0);
@@ -53,7 +44,6 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 		#-pos 0 0 0 -type omni -r 100 -sro 0 -nuv 0 -cye none -cyi 1 -spd 1 -srn 0 -nsp 1 -tsp 0 -mxd 0 -mnd 0 -dx 1 -dy 0 -dz 0 -sp 0 ;
 		
 		
-
 
 # Creator
 def cmdCreator():
@@ -79,21 +69,28 @@ def uninitializePlugin(mobject):
 		
 		
 class WeatherUI():
+
 	
 	def __init__(self):
-		pass;
+		self.snow = Snow();
 	
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
 		c.formLayout(numberOfDivisions=10);
 		#c.textField();
 		#c.intSlider(min=-100,max=100,value=0,step=1,width=200);
-		c.floatSliderGrp('testSlider',label='Move Penis', field=True, value=0, dc=slider_drag_callback, min=-10, max=10);
+		c.checkBox('snowCheck',label='Snow', onc=self.snowOn, ofc=self.snowOff);
 		c.showWindow(window);
 		
 	def setupSky(self):
 		c.polyPlane(h=30,w=30,n='emitPlane');
 		c.move(0,20,0,'emitPlane');
+		
+	def snowOn(self,*args):
+		self.snow.init();
+		
+	def snowOff(self,*args):
+		print 'remove';	
 	
 
 class Snow():
@@ -105,8 +102,19 @@ class Snow():
 		c.select('emitPlane');
 		c.emitter(n='snowEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='snowParticle');
+		c.select(cl=True);
 		c.gravity(n='gravity',m=0.5);
+		c.select(cl=True);
+		c.turbulence(n='turb',m=5);
 		c.connectDynamic('snowParticle',em='snowEmitter');
 		c.connectDynamic('snowParticle',f='gravity');
+		c.connectDynamic('snowParticle',f='turb');
 		c.select(cl=True);
 
+class Rain():
+	
+	def __init__(self):
+		pass;
+		
+	def init(self):
+		pass;
