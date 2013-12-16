@@ -7,11 +7,14 @@ import maya.cmds as c;
 def slider_drag_callback(*args):
 	value = c.floatSliderGrp('testSlider', query=True, value=True);
 	print value;
+	
+	c.gravity('gravity', e=True, magnitude= value);
+	'''
 	c.move(value,2.5,0,'shaft');
 	c.move(2 + value,0,0,'ball1');
 	c.move(-2 + value,0,0,'ball2');
 	c.move(value,5,0,'glance');
-
+	'''
 
 
 kPluginCmdName = "WeatherViz"
@@ -31,6 +34,7 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 		weatherUI.init();
 		
 	def spawn(self):
+		'''
 		c.polySphere(name='ball1');
 		c.move(2,0,0);
 		c.polySphere(name='ball2');
@@ -39,7 +43,21 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 		c.move(0,2.5,0,'shaft');
 		c.polySphere(name='glance');
 		c.move(0,5,0);
-
+		'''
+		c.polyPlane(name = 'emmiterPlane', w=10, h=10);
+		c.move(0, 10, 0);
+		c.polyPlane(name = 'flore', w=15, h=15);
+		
+		c.emitter( dx=0, dy=-1, dz=0, sp=0.33, pos=(1, 1, 1), n='myEmitter', type='omni');
+		c.particle( n='emittedParticles' );
+		c.connectDynamic( 'emittedParticles', em='myEmitter' );
+		c.addDynamic( 'emmiterPlane', 'myEmitter' );
+		
+		c.gravity(name = 'gravity');
+		c.connectDynamic( 'emittedParticles', f = 'gravity' );
+		
+		c.collision('flore', f=0.05, r=0.3);
+		c.connectDynamic('emittedParticles', c = 'flore');
 
 # Creator
 def cmdCreator():
