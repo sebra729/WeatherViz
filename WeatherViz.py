@@ -106,7 +106,7 @@ class Snow():
 		c.select(cl=True);
 		
 	def remove(WeatherUI,self):
-		print 'remove';
+		c.delete('snowEmitter','gravity','turb','snowParticle');
 
 class Rain():
 	
