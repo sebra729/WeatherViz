@@ -118,7 +118,6 @@ class Snow():
 		
 	def addCollision(WeatherUI):
 		objects = c.ls(sl=True);
-		print objects[0];
 		for i in range(0,len(objects)):
 			c.collision(objects[i], f=1, r=0);
 			c.connectDynamic('snowParticle', c=objects[i]);
@@ -146,7 +145,6 @@ class Rain():
 	def addCollision(WeatherUI):
 		objects = c.ls(sl=True);
 		for i in range(0,len(objects)):
-			object = 'planes';
 			c.collision(objects[i], f=0.3, r=0.5);
 			c.connectDynamic('rainParticle', c=objects[i]);
 			print objects[i];
