@@ -81,13 +81,19 @@ class WeatherUI():
 		c.checkBoxGrp('weatherPanel', label='Weather');
 		c.checkBox('snowCheck', label='Snow', onc=self.snow.init, ofc=self.snow.remove, p='weatherPanel');
 		c.checkBox('rainCheck', label='Rain', onc=self.rain.init, ofc=self.rain.remove, p='weatherPanel');
+		c.button('collButton', label='Add collision', c=self.addCollision);
 		c.showWindow(window);
 		
 	def setupSky(self):
 		c.polyPlane(h=30,w=30,n='emitPlane');
 		c.move(0,20,0,'emitPlane');
 		c.select(cl=True);
-	
+		
+	def addCollision(self,*args):
+		if c.particleExists('snowParticle'):
+			self.snow.addCollision();
+		if c.particleExists('rainParticle'):
+			self.rain.addCollision();
 
 class Snow():
 	
@@ -109,6 +115,14 @@ class Snow():
 		
 	def remove(WeatherUI,self):
 		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle');
+		
+	def addCollision(WeatherUI):
+		objects = c.ls(sl=True);
+		print objects[0];
+		for i in range(0,len(objects)):
+			c.collision(objects[i], f=1, r=0);
+			c.connectDynamic('snowParticle', c=objects[i]);
+			print objects[i];
 
 class Rain():
 	
@@ -128,3 +142,11 @@ class Rain():
 		
 	def remove(WeatherUI,self):
 		c.delete('rainEmitter','rainGravity','rainParticle');
+		
+	def addCollision(WeatherUI):
+		objects = c.ls(sl=True);
+		for i in range(0,len(objects)):
+			object = 'planes';
+			c.collision(objects[i], f=0.3, r=0.5);
+			c.connectDynamic('rainParticle', c=objects[i]);
+			print objects[i];
