@@ -73,18 +73,20 @@ class WeatherUI():
 	
 	def __init__(self):
 		self.snow = Snow();
+		self.rain = Rain();
 	
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
 		c.formLayout(numberOfDivisions=10);
-		#c.textField();
-		#c.intSlider(min=-100,max=100,value=0,step=1,width=200);
-		c.checkBox('snowCheck',label='Snow', onc=self.snow.init, ofc=self.snow.remove);
+		c.checkBoxGrp('weatherPanel', label='Weather');
+		c.checkBox('snowCheck', label='Snow', onc=self.snow.init, ofc=self.snow.remove, p='weatherPanel');
+		c.checkBox('rainCheck', label='Rain', onc=self.rain.init, ofc=self.rain.remove, p='weatherPanel');
 		c.showWindow(window);
 		
 	def setupSky(self):
 		c.polyPlane(h=30,w=30,n='emitPlane');
 		c.move(0,20,0,'emitPlane');
+		c.select(cl=True);
 	
 
 class Snow():
@@ -97,21 +99,32 @@ class Snow():
 		c.emitter(n='snowEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='snowParticle');
 		c.select(cl=True);
-		c.gravity(n='gravity',m=0.5);
+		c.gravity(n='snowGravity',m=0.5);
 		c.select(cl=True);
-		c.turbulence(n='turb',m=5);
+		c.turbulence(n='snowTurb',m=5);
 		c.connectDynamic('snowParticle',em='snowEmitter');
-		c.connectDynamic('snowParticle',f='gravity');
-		c.connectDynamic('snowParticle',f='turb');
+		c.connectDynamic('snowParticle',f='snowGravity');
+		c.connectDynamic('snowParticle',f='snowTurb');
 		c.select(cl=True);
 		
 	def remove(WeatherUI,self):
-		c.delete('snowEmitter','gravity','turb','snowParticle');
+		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle');
 
 class Rain():
 	
 	def __init__(self):
 		pass;
 		
-	def init(self):
-		pass;
+	def init(WeatherUI,self):
+		c.select('emitPlane');
+		c.emitter(n='rainEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
+		c.particle(n='rainParticle');
+		c.select(cl=True);
+		c.gravity(n='rainGravity');
+		c.select(cl=True);
+		c.connectDynamic('rainParticle',em='rainEmitter');
+		c.connectDynamic('rainParticle',f='rainGravity');
+		c.select(cl=True);
+		
+	def remove(WeatherUI,self):
+		c.delete('rainEmitter','rainGravity','rainParticle');
