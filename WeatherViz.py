@@ -105,8 +105,12 @@ class Snow():
 		c.select('emitPlane');
 		c.emitter(n='snowEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='snowParticle');
+		c.setAttr( "snowParticle|snowParticleShape.particleRenderType", 8); # 1 ist for 8
 		c.gravity(n='gravity',m=0.5);
 		c.connectDynamic('snowParticle',em='snowEmitter');
 		c.connectDynamic('snowParticle',f='gravity');
+		c.addAttr('snowParticleShape', ln='rgbPP', dt='vectorArray' );
+		c.dynExpression('snowParticleShape', s='snowParticleShape.rgbPP = <<1.0, 1.0, 1.0>>', c=1);
+		#c.dynExpression( 'snowParticleShape', s='snowParticle|snowParticleShape.rgbPP = << 1.0, 1.0, 1.0 >>', c=1 );
 		c.select(cl=True);
 
