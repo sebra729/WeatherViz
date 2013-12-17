@@ -11,6 +11,7 @@ def slider_drag_callback(*args):
 	
 	c.gravity('gravity', e=True, magnitude= valueGravity);
 	c.collision('flore', e=True, r= valueR);
+	#c.radioButton('rb1', e=True, enable= False);
 	'''
 	c.move(value,2.5,0,'shaft');
 	c.move(2 + value,0,0,'ball1');
@@ -46,6 +47,8 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 		c.polySphere(name='glance');
 		c.move(0,5,0);
 		'''
+		c.file('C:/Users/Sebastian/Documents/maya/projects/default/data/Cobblestones3/Files/untitled.fbx', type='FBX', ra=True, mergeNamespacesOnClash=False, namespace='Beach', options='fbx',  i=True);
+		
 		c.polyPlane(name = 'emmiterPlane', w=10, h=10);
 		c.move(0, 10, 0);
 		c.polyPlane(name = 'flore', w=15, h=15);
@@ -92,12 +95,14 @@ class WeatherUI():
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
 		#form = c.formLayout(numberOfDivisions=10);
-		c.flowLayout(columnSpacing=10);
+		c.rowColumnLayout(numberOfColumns=1);
 		#c.textField();
 		#c.intSlider(min=-100,max=100,value=0,step=1,width=200);
 		c.floatSliderGrp('testSlider',label='Gravity', field=True, value=0, dc=slider_drag_callback, min=-10, max=10);
 		c.floatSliderGrp('slider',label='Collision Resilience', field=True, value=0.3, dc=slider_drag_callback, min=0, max=1);
-		
+		c.radioCollection();
+		c.radioButton('rb1', label='One', dpc=slider_drag_callback);
+		c.radioButton('rb2', label='Two', dpc=slider_drag_callback);
 		#c.formLayout(form, edit=True, attachForm=[(s1, 'top', 5), (s2, 5)]);
 		c.showWindow(window);
 		
