@@ -90,7 +90,7 @@ class WeatherUI():
 		
 	def setupSky(self):
 		c.polyPlane(h=30,w=30,n='emitPlane');
-		cmds.polyNormal('emitPlane', nm=3 , n='polynormalReversed');
+		c.polyNormal('emitPlane', nm=3 , n='polynormalReversed');
 		c.move(0,20,0,'emitPlane');
 		c.select(cl=True);
 		
