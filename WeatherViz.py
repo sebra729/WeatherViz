@@ -77,11 +77,15 @@ class WeatherUI():
 	
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
-		c.formLayout(numberOfDivisions=10);
+		form = c.formLayout(numberOfDivisions=100);
 		c.checkBoxGrp('weatherPanel', label='Weather');
 		c.checkBox('snowCheck', label='Snow', onc=self.snow.init, ofc=self.snow.remove, p='weatherPanel');
 		c.checkBox('rainCheck', label='Rain', onc=self.rain.init, ofc=self.rain.remove, p='weatherPanel');
 		c.button('collButton', label='Add collision', c=self.addCollision);
+		tempSlider = c.floatSliderGrp('tempSilder',label='Temperature', field=True, value=0, dc=self.slider_drag_callback, min=-1, max=1);
+		
+		c.formLayout(form, edit=True, attachPosition=[(tempSlider, 'top', 20, 1)]);
+		
 		c.showWindow(window);
 		
 	def setupSky(self):
@@ -94,6 +98,13 @@ class WeatherUI():
 			self.snow.addCollision();
 		if c.particleExists('rainParticle'):
 			self.rain.addCollision();
+			
+			
+	def slider_drag_callback(self,*args):
+		value = c.floatSliderGrp('tempSilder', query=True, value=True);
+		print value;
+		#c.move(value,2.5,0,'lll');
+
 
 class Snow():
 	
@@ -109,7 +120,7 @@ class Snow():
 		c.setAttr( "snowParticle|snowParticleShape.particleRenderType", 8); # 1 ist for 8
 		c.gravity(n='snowGravity',m=0.5);
 		c.select(cl=True);
-		c.turbulence(n='snowTurb',m=5);
+		c.turbulence(n='snowTurb',m=1);
 		c.connectDynamic('snowParticle',em='snowEmitter');
 		c.connectDynamic('snowParticle',f='snowGravity');
 		c.connectDynamic('snowParticle',f='snowTurb');
