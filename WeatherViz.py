@@ -3,11 +3,6 @@ import maya.OpenMaya as OpenMaya;
 import maya.OpenMayaMPx as OpenMayaMPx;
 import maya.cmds as c;
 
-
-
-
-
-
 kPluginCmdName = "WeatherViz"
 
 # Command
@@ -19,30 +14,10 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 	def doIt(self, argList):
 		print 'Starting WeatherViz';
 		
-		#self.penis();
-		
 		weatherUI = WeatherUI();
 		weatherUI.init();
-		weatherUI.setupSky();
-		
-	def penis(self):
-		c.polySphere(name='ball1');
-		c.move(2,0,0);
-		c.polySphere(name='ball2');
-		c.move(-2,0,0);
-		c.polyCylinder(name='shaft',h=5);
-		c.move(0,2.5,0,'shaft');
-		c.polySphere(name='glance');
-		c.move(0,5,0);
-		c.select(cl=True);
-		c.emitter(n='emit',type='dir',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=1,dz=0,sp=0.2);
-		c.particle(n='particle');
-		c.connectDynamic('particle',em='emit');
-		c.move(0,5.5,0,'emit');
-		c.select(cl=True);
-		
-		#-pos 0 0 0 -type omni -r 100 -sro 0 -nuv 0 -cye none -cyi 1 -spd 1 -srn 0 -nsp 1 -tsp 0 -mxd 0 -mnd 0 -dx 1 -dy 0 -dz 0 -sp 0 ;
-		
+		weatherUI.setUpSky();
+		weatherUI.setUpModel();
 		
 
 # Creator
@@ -69,24 +44,53 @@ def uninitializePlugin(mobject):
 		
 		
 class WeatherUI():
-
-	
+		
 	def __init__(self):
 		self.snow = Snow();
 		self.rain = Rain();
 	
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
-		c.formLayout(numberOfDivisions=10);
+		form = c.formLayout(numberOfDivisions=100);
 		c.checkBoxGrp('weatherPanel', label='Weather');
 		c.checkBox('snowCheck', label='Snow', onc=self.snow.init, ofc=self.snow.remove, p='weatherPanel');
 		c.checkBox('rainCheck', label='Rain', onc=self.rain.init, ofc=self.rain.remove, p='weatherPanel');
 		c.button('collButton', label='Add collision', c=self.addCollision);
+		s1 = c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10);
+		c.formLayout(form, edit=True, attachPosition=[(s1, 'top', 20, 1)]);
 		c.showWindow(window);
 		
-	def setupSky(self):
-		c.polyPlane(h=30,w=30,n='emitPlane');
-		c.move(0,20,0,'emitPlane');
+	def setUpModel(self):
+		#c.file('C:/Users/Sebastian/Documents/maya/projects/default/data/Cobblestones3/Files/untitled.fbx', type='FBX', ra=True, mergeNamespacesOnClash=False, namespace='untitled', options='fbx',  i=True);	
+		name = 'C:\Users\Sebastian\Documents\maya\projects\default\sourceimages\exr\Location_1_1_hdr.exr';
+		sphere = c.polySphere(n='worldSphere', ax=[0, 0, 0], r=80);
+		shader = c.shadingNode('surfaceShader', asShader=True);
+		SG = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=shader+"SG");
+		c.connectAttr(shader+'.outColor', SG+".surfaceShader", force=True);
+		img = c.shadingNode('file', asTexture=True);
+		c.setAttr(img+'.fileTextureName', name, type='string');
+		c.connectAttr(img+'.outColor', shader+'.outColor', force=True);
+		c.sets(sphere[0], edit=True, forceElement=SG);
+		c.setAttr(img+'.hdrMapping', 2);
+		c.setAttr(img+'.hdrExposure', 3);
+		
+		ground = c.polyPlane(h=100,w=100, n='groundPlane');
+		#lambertShader = c.shadingNode('lambert', asShader=True);
+		#lambertShaderSG = c.sets(lambertShader, renderable=True, noSurfaceShader=True, empty=True, name=lambertShader+'SG');
+		#c.connectAttr(lambertShader+'.outColor',lambertShaderSG+'.surfaceShader', force=True);
+		#c.select( 'groundPlane' );
+		#c.hyperShade(assign=lambertShader);
+		#c.setAttr(lambertShader+'.transparency', 1, 1, 1, type="double3");
+		
+		alphaShader = c.shadingNode('lambert', asShader=True, n='alphaShader');
+		SG2 = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=alphaShader+"SG2");
+		c.setAttr(alphaShader+'.transparency', 1, 1, 1, type="double3");
+		c.select( 'groundPlane' );
+		c.hyperShade( assign=alphaShader);
+		
+	def setUpSky(self):
+		c.polyPlane(ax = [0, 270, 0], h=100,w=100,n='emitPlane');
+		c.move(0,100,0,'emitPlane');
 		c.select(cl=True);
 		
 	def addCollision(self,*args):
@@ -94,6 +98,11 @@ class WeatherUI():
 			self.snow.addCollision();
 		if c.particleExists('rainParticle'):
 			self.rain.addCollision();
+			
+	def slider_drag_callback(*args):
+		valueTurb = c.floatSliderGrp('snowTurb', query=True, value=True);
+		print valueTurb;
+		c.turbulence('snowTurb', e=True, m=valueTurb);
 
 class Snow():
 	
@@ -115,16 +124,19 @@ class Snow():
 		c.connectDynamic('snowParticle',f='snowTurb');
 		c.addAttr('snowParticleShape', ln='rgbPP', dt='vectorArray' );
 		c.dynExpression('snowParticleShape', s='snowParticleShape.rgbPP = <<1.0, 1.0, 1.0>>', c=1);
-
 		c.select(cl=True);
+ 		c.air(n='snowAir', m=5.0, mxd=20.0, pos=[0, 30, 0], vco=True);
+		c.connectDynamic('snowParticle',f='snowAir');
+		
 		
 	def remove(WeatherUI,self):
 		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle');
 		
 	def addCollision(WeatherUI):
+		
 		objects = c.ls(sl=True);
 		for i in range(0,len(objects)):
-			c.collision(objects[i], f=1, r=0);
+			c.collision(objects[i], f=0.05, r=0);
 			c.connectDynamic('snowParticle', c=objects[i]);
 			print objects[i];
 
@@ -135,21 +147,24 @@ class Rain():
 		
 	def init(WeatherUI,self):
 		c.select('emitPlane');
-		c.emitter(n='rainEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
+		c.emitter(n='rainEmitter',type='surf',r=300,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='rainParticle');
 		c.select(cl=True);
 		c.gravity(n='rainGravity');
 		c.select(cl=True);
 		c.connectDynamic('rainParticle',em='rainEmitter');
 		c.connectDynamic('rainParticle',f='rainGravity');
+		c.addAttr('rainParticleShape', ln='rgbPP', dt='vectorArray' );
+		c.dynExpression('rainParticleShape', s='rainParticleShape.rgbPP = <<0, 0, 1.0>>', c=1);
 		c.select(cl=True);
 		
 	def remove(WeatherUI,self):
 		c.delete('rainEmitter','rainGravity','rainParticle');
 		
 	def addCollision(WeatherUI):
+		
 		objects = c.ls(sl=True);
 		for i in range(0,len(objects)):
-			c.collision(objects[i], f=0.3, r=0.5);
+			c.collision(objects[i], f=0.05, r=0.2);
 			c.connectDynamic('rainParticle', c=objects[i]);
 			print objects[i];
