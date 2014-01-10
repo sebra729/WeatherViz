@@ -56,6 +56,7 @@ class WeatherUI():
 		c.checkBox('snowCheck', label='Snow', onc=self.snow.init, ofc=self.snow.remove, p='weatherPanel');
 		c.checkBox('rainCheck', label='Rain', onc=self.rain.init, ofc=self.rain.remove, p='weatherPanel');
 		c.button('collButton', label='Add collision', c=self.addCollision);
+
 		s1 = c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10);
 		c.formLayout(form, edit=True, attachPosition=[(s1, 'top', 20, 1)]);
 		c.showWindow(window);
@@ -89,7 +90,8 @@ class WeatherUI():
 		c.hyperShade( assign=alphaShader);
 		
 	def setUpSky(self):
-		c.polyPlane(ax = [0, 270, 0], h=100,w=100,n='emitPlane');
+		c.polyPlane( h=100,w=100,n='emitPlane');
+		c.polyNormal('emitPlane', nm=3 , n='polynormalReversed');
 		c.move(0,100,0,'emitPlane');
 		c.select(cl=True);
 		
@@ -118,7 +120,7 @@ class Snow():
 		c.setAttr( "snowParticle|snowParticleShape.particleRenderType", 8); # 1 ist for 8
 		c.gravity(n='snowGravity',m=0.5);
 		c.select(cl=True);
-		c.turbulence(n='snowTurb',m=5);
+		c.turbulence(n='snowTurb',m=1);
 		c.connectDynamic('snowParticle',em='snowEmitter');
 		c.connectDynamic('snowParticle',f='snowGravity');
 		c.connectDynamic('snowParticle',f='snowTurb');
