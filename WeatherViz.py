@@ -92,7 +92,7 @@ class WeatherUI():
 		c.hyperShade( assign=alphaShader);
 		
 	def setUpCamera(self):
-		c.camera();
+		c.camera(p=[1.5,10, 35], rot=[-10,10,0]);
 		
 	def setUpSky(self):
 		c.polyPlane( h=100,w=100,n='emitPlane');
@@ -134,14 +134,17 @@ class Snow():
 		c.addAttr('snowParticleShape', ln='radius', at='float', min=0, max=20, dv=1);
 		c.setAttr('snowParticleShape.radius', 0.3);
 		c.setAttr("particleCloud1.color", 1, 1, 1, type="double3");
+		c.setAttr('snowParticleShape.lifespanMode', 2);
+		c.setAttr('snowParticleShape.lifespan', 30)
+		
 		c.select(cl=True);
- 		c.air(n='snowAir', m=5.0, mxd=20.0, pos=[0, 30, 0], vco=True);
+ 		c.air(n='snowAir', m=30.0, mxd=20.0, pos=[-60, -7, -68], vco=True);
 		c.connectDynamic('snowParticle',f='snowAir');
 		
 		
 		
 	def remove(WeatherUI,self):
-		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle');
+		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle', 'snowAir');
 		
 	def addCollision(WeatherUI):
 		
