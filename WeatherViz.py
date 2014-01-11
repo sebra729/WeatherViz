@@ -131,6 +131,7 @@ class Snow():
 		c.select(cl=True);
  		c.air(n='snowAir', m=5.0, mxd=20.0, pos=[0, 30, 0], vco=True);
 		c.connectDynamic('snowParticle',f='snowAir');
+		c.setAttr("particleCloud1.color", 1, 1, 1, type="double3");
 		
 		
 	def remove(WeatherUI,self):
