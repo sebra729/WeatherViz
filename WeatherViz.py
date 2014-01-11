@@ -160,7 +160,9 @@ class Rain():
 		c.select('emitPlane');
 		c.emitter(n='rainEmitter',type='surf',r=300,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='rainParticle');
+		
 		c.select(cl=True);
+		c.setAttr( "rainParticle|rainParticleShape.particleRenderType", 6); # rainParticleShape/render Attributes
 		c.gravity(n='rainGravity');
 		c.select(cl=True);
 		c.connectDynamic('rainParticle',em='rainEmitter');
