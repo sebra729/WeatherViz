@@ -76,6 +76,7 @@ class WeatherUI():
 		c.setAttr(img+'.hdrExposure', 3);
 		
 		ground = c.polyPlane(h=100,w=100, n='groundPlane');
+		c.move(0,-13, 0, 'groundPlane');
 		#lambertShader = c.shadingNode('lambert', asShader=True);
 		#lambertShaderSG = c.sets(lambertShader, renderable=True, noSurfaceShader=True, empty=True, name=lambertShader+'SG');
 		#c.connectAttr(lambertShader+'.outColor',lambertShaderSG+'.surfaceShader', force=True);
@@ -126,6 +127,7 @@ class Snow():
 		c.connectDynamic('snowParticle',f='snowTurb');
 		c.addAttr('snowParticleShape', ln='rgbPP', dt='vectorArray' );
 		c.dynExpression('snowParticleShape', s='snowParticleShape.rgbPP = <<1.0, 1.0, 1.0>>', c=1);
+		c.setAttr('patricleCloud1.color', 1, 1, 1, type="double3");
 		c.select(cl=True);
  		c.air(n='snowAir', m=5.0, mxd=20.0, pos=[0, 30, 0], vco=True);
 		c.connectDynamic('snowParticle',f='snowAir');
