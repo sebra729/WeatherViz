@@ -52,14 +52,20 @@ class WeatherUI():
 	
 	def init(self):
 		window = c.window(title='WeatherViz',widthHeight=(400,600));
-		form = c.formLayout(numberOfDivisions=100);
+		#form = c.formLayout(numberOfDivisions=100);
+		c.rowColumnLayout(numberOfColumns=1);
 		c.checkBoxGrp('weatherPanel', label='Weather');
 		c.checkBox('snowCheck', label='Snow', onc=self.snow.init, ofc=self.snow.remove, p='weatherPanel');
 		c.checkBox('rainCheck', label='Rain', onc=self.rain.init, ofc=self.rain.remove, p='weatherPanel');
 		c.button('collButton', label='Add collision', c=self.addCollision);
 
-		s1 = c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10);
-		c.formLayout(form, edit=True, attachPosition=[(s1, 'top', 20, 1)]);
+
+		#s1 = c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10);
+		c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10, en=False);
+		c.floatSliderGrp('snowIntens',label='Snow Intencity', field=True, value=200, dc=self.slider_drag_callback, min=0, max=1000, en=False);
+		c.floatSliderGrp('rainIntens',label='Rain Intencity', field=True, value=200, dc=self.slider_drag_callback, min=0, max=1000, en=False);
+		#c.formLayout(form, edit=True, attachPosition=[(s1, 'top', 20, 1)]);
+		#c.formLayout(form, edit=True, attachPosition=[(s2, 'top', 20, 1)]);
 		c.showWindow(window);
 		
 	def setUpModel(self):
@@ -107,9 +113,19 @@ class WeatherUI():
 			self.rain.addCollision();
 			
 	def slider_drag_callback(*args):
-		valueTurb = c.floatSliderGrp('snowTurb', query=True, value=True);
-		print valueTurb;
-		c.turbulence('snowTurb', e=True, m=valueTurb);
+		if c.objExists('snowTurb'):
+			valueTurb = c.floatSliderGrp('snowTurb', query=True, value=True);
+			#print valueTurb;
+			c.turbulence('snowTurb', e=True, m=valueTurb);
+		
+		if c.objExists('snowEmitter'):
+			valueSnowInt = c.floatSliderGrp('snowIntens', query=True, value=True);
+			print valueSnowInt;
+			c.emitter('snowEmitter', e=True, r=valueSnowInt);
+		
+		if c.objExists('rainEmitter'):
+			valueRainInt = c.floatSliderGrp('rainIntens', query=True, value=True);
+			c.emitter('rainEmitter', e=True, r=valueRainInt);
 
 class Snow():
 	
@@ -142,9 +158,13 @@ class Snow():
 		c.connectDynamic('snowParticle',f='snowAir');
 		
 		
+		c.floatSliderGrp('snowTurb',en=True, e=True);
+		c.floatSliderGrp('snowIntens',en=True, e=True);
 		
 	def remove(WeatherUI,self):
 		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle', 'snowAir');
+		c.floatSliderGrp('snowTurb',en=False, e=True);
+		c.floatSliderGrp('snowIntens',en=False, e=True);
 		
 	def addCollision(WeatherUI):
 		
@@ -174,8 +194,11 @@ class Rain():
 		c.dynExpression('rainParticleShape', s='rainParticleShape.rgbPP = <<0, 0, 1.0>>', c=1);
 		c.select(cl=True);
 		
+		c.floatSliderGrp('rainIntens',en=True, e=True);
+		
 	def remove(WeatherUI,self):
 		c.delete('rainEmitter','rainGravity','rainParticle');
+		c.floatSliderGrp('rainIntens',en=False, e=True);
 		
 	def addCollision(WeatherUI):
 		
