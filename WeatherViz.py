@@ -62,7 +62,7 @@ class WeatherUI():
 
 
 		#s1 = c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10);
-		c.floatSliderGrp('snowTurb',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10, en=False);
+		c.floatSliderGrp('snowTurbSlider',label='Snow turbulence', field=True, value=5, dc=self.slider_drag_callback, min=0, max=10, en=False);
 		c.floatSliderGrp('snowIntens',label='Snow Intencity', field=True, value=200, dc=self.slider_drag_callback, min=0, max=1000, en=False);
 		c.floatSliderGrp('rainIntens',label='Rain Intencity', field=True, value=200, dc=self.slider_drag_callback, min=0, max=1000, en=False);
 		#c.formLayout(form, edit=True, attachPosition=[(s1, 'top', 20, 1)]);
@@ -87,10 +87,10 @@ class WeatherUI():
 		
 		
 		mel.eval('setCurrentRenderer mentalRay;');
-		lbl = c.createNode( 'mentalrayIblShape', n='myIbl' );
+		ibl = c.createNode( 'mentalrayIblShape', n='myIbl' );
 		c.rename('mentalrayIbl1', 'myIblShape');
 		c.evalDeferred( "c.connectAttr(  ibl+'.message', 'mentalrayGlobals.imageBasedLighting', f=True)", lp=True);
-		mel.eval('$path = "C:/Users/Philip/Desktop/SKOLA/TNCG14/projekt/sIBL/Location_1_1_hdr.exr"');
+		mel.eval('$path = "C:/Users/Sebastian/Documents/maya/projects/default/sourceimages/exr/Location_1_1_hdr.exr"');
 		mel.eval('AEassignFilenameCB  myIbl.texture $path "image"');
 		c.setAttr('myIbl.colorGain', 14, 14, 14, type='double3');
 		#sets render stats
@@ -130,7 +130,7 @@ class WeatherUI():
 			
 	def slider_drag_callback(*args):
 		if c.objExists('snowTurb'):
-			valueTurb = c.floatSliderGrp('snowTurb', query=True, value=True);
+			valueTurb = c.floatSliderGrp('snowTurbSlider', query=True, value=True);
 			#print valueTurb;
 			c.turbulence('snowTurb', e=True, m=valueTurb);
 		
@@ -174,12 +174,13 @@ class Snow():
 		c.connectDynamic('snowParticle',f='snowAir');
 		
 		
-		c.floatSliderGrp('snowTurb',en=True, e=True);
-		c.floatSliderGrp('snowIntens',en=True, e=True);
+		c.floatSliderGrp('snowTurbSlider', en=True, e=True);
+		c.floatSliderGrp('snowIntens', en=True, e=True);
+		
 		
 	def remove(WeatherUI,self):
 		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle', 'snowAir');
-		c.floatSliderGrp('snowTurb',en=False, e=True);
+		c.floatSliderGrp('snowTurbSlider',en=False, e=True);
 		c.floatSliderGrp('snowIntens',en=False, e=True);
 		
 	def addCollision(WeatherUI):
