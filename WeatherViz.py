@@ -19,6 +19,7 @@ class scriptedCommand(OpenMayaMPx.MPxCommand):
 		weatherUI.init();
 		weatherUI.setUpSky();
 		weatherUI.setUpModel();
+		weatherUI.setUpCamera();
 		
 
 # Creator
@@ -97,12 +98,17 @@ class WeatherUI():
 		c.setAttr('myIblShape.scaleZ', 100);
 		
 		ground = c.polyPlane(h=100,w=100, n='groundPlane');
+		c.move(0,-13, 0, 'groundPlane');
+
 		
 		alphaShader = c.shadingNode('lambert', asShader=True, n='alphaShader');
 		SG2 = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=alphaShader+"SG2");
 		c.setAttr(alphaShader+'.transparency', 1, 1, 1, type="double3");
 		c.select( 'groundPlane' );
 		c.hyperShade( assign=alphaShader);
+		
+	def setUpCamera(self):
+		c.camera(p=[1.5,10, 35], rot=[-10,10,0]);
 		
 	def setUpSky(self):
 		c.polyPlane( h=100,w=100,n='emitPlane');
@@ -128,7 +134,7 @@ class Snow():
 	
 	def init(WeatherUI,self):
 		c.select('emitPlane');
-		c.emitter(n='snowEmitter',type='surf',r=100,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
+		c.emitter(n='snowEmitter',type='surf',r=300,sro=0,nuv=0,cye='none',cyi=1,spd=1,srn=0,nsp=1,tsp=0,mxd=0,mnd=0,dx=0,dy=-1,dz=0,sp=1);
 		c.particle(n='snowParticle');
 
 		c.select(cl=True);
@@ -141,14 +147,20 @@ class Snow():
 		c.connectDynamic('snowParticle',f='snowTurb');
 		c.addAttr('snowParticleShape', ln='rgbPP', dt='vectorArray' );
 		c.dynExpression('snowParticleShape', s='snowParticleShape.rgbPP = <<1.0, 1.0, 1.0>>', c=1);
-		c.select(cl=True);
- 		c.air(n='snowAir', m=5.0, mxd=20.0, pos=[0, 30, 0], vco=True);
-		c.connectDynamic('snowParticle',f='snowAir');
+		c.addAttr('snowParticleShape', ln='radius', at='float', min=0, max=20, dv=1);
+		c.setAttr('snowParticleShape.radius', 0.3);
 		c.setAttr("particleCloud1.color", 1, 1, 1, type="double3");
+		c.setAttr('snowParticleShape.lifespanMode', 2);
+		c.setAttr('snowParticleShape.lifespan', 30)
+		
+		c.select(cl=True);
+ 		c.air(n='snowAir', m=30.0, mxd=20.0, pos=[-60, -7, -68], vco=True);
+		c.connectDynamic('snowParticle',f='snowAir');
+		
 		
 		
 	def remove(WeatherUI,self):
-		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle');
+		c.delete('snowEmitter','snowGravity','snowTurb','snowParticle', 'snowAir');
 		
 	def addCollision(WeatherUI):
 		
