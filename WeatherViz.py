@@ -2,6 +2,7 @@ import sys
 import maya.OpenMaya as OpenMaya;
 import maya.OpenMayaMPx as OpenMayaMPx;
 import maya.cmds as c;
+import maya.mel as mel;
 
 kPluginCmdName = "WeatherViz"
 
@@ -63,25 +64,39 @@ class WeatherUI():
 		
 	def setUpModel(self):
 		#c.file('C:/Users/Sebastian/Documents/maya/projects/default/data/Cobblestones3/Files/untitled.fbx', type='FBX', ra=True, mergeNamespacesOnClash=False, namespace='untitled', options='fbx',  i=True);	
-		name = 'C:\Users\Sebastian\Documents\maya\projects\default\sourceimages\exr\Location_1_1_hdr.exr';
-		sphere = c.polySphere(n='worldSphere', ax=[0, 0, 0], r=80);
-		shader = c.shadingNode('surfaceShader', asShader=True);
-		SG = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=shader+"SG");
-		c.connectAttr(shader+'.outColor', SG+".surfaceShader", force=True);
-		img = c.shadingNode('file', asTexture=True);
-		c.setAttr(img+'.fileTextureName', name, type='string');
-		c.connectAttr(img+'.outColor', shader+'.outColor', force=True);
-		c.sets(sphere[0], edit=True, forceElement=SG);
-		c.setAttr(img+'.hdrMapping', 2);
-		c.setAttr(img+'.hdrExposure', 3);
+		#name = 'C:\Users\Sebastian\Documents\maya\projects\default\sourceimages\exr\Location_1_1_hdr.exr';
+		#sphere = c.polySphere(n='worldSphere', ax=[0, 0, 0], r=80);
+		#shader = c.shadingNode('surfaceShader', asShader=True);
+		#SG = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=shader+"SG");
+		#c.connectAttr(shader+'.outColor', SG+".surfaceShader", force=True);
+		#img = c.shadingNode('file', asTexture=True);
+		#c.setAttr(img+'.fileTextureName', name, type='string');
+		#c.connectAttr(img+'.outColor', shader+'.outColor', force=True);
+		#c.sets(sphere[0], edit=True, forceElement=SG);
+		#c.setAttr(img+'.hdrMapping', 2);
+		#c.setAttr(img+'.hdrExposure', 3);
+		
+		
+		
+		
+		mel.eval('setCurrentRenderer mentalRay;');
+		lbl = c.createNode( 'mentalrayIblShape', n='myIbl' );
+		c.rename('mentalrayIbl1', 'myIblShape');
+		c.evalDeferred( "c.connectAttr(  ibl+'.message', 'mentalrayGlobals.imageBasedLighting', f=True)", lp=True);
+		mel.eval('$path = "C:/Users/Philip/Desktop/SKOLA/TNCG14/projekt/sIBL/Location_1_1_hdr.exr"');
+		mel.eval('AEassignFilenameCB  myIbl.texture $path "image"');
+		c.setAttr('myIbl.colorGain', 14, 14, 14, type='double3');
+		#sets render stats
+		c.setAttr('myIbl.visibleInEnvironment', 1);
+		c.setAttr('myIbl.visibleInReflections', 1);
+		c.setAttr('myIbl.visibleInRefractions', 1);
+		c.setAttr('myIbl.visibleInFinalGather', 1);
+
+		c.setAttr('myIblShape.scaleX', 100);
+		c.setAttr('myIblShape.scaleY', 100);
+		c.setAttr('myIblShape.scaleZ', 100);
 		
 		ground = c.polyPlane(h=100,w=100, n='groundPlane');
-		#lambertShader = c.shadingNode('lambert', asShader=True);
-		#lambertShaderSG = c.sets(lambertShader, renderable=True, noSurfaceShader=True, empty=True, name=lambertShader+'SG');
-		#c.connectAttr(lambertShader+'.outColor',lambertShaderSG+'.surfaceShader', force=True);
-		#c.select( 'groundPlane' );
-		#c.hyperShade(assign=lambertShader);
-		#c.setAttr(lambertShader+'.transparency', 1, 1, 1, type="double3");
 		
 		alphaShader = c.shadingNode('lambert', asShader=True, n='alphaShader');
 		SG2 = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=alphaShader+"SG2");
@@ -162,6 +177,14 @@ class Rain():
 		c.addAttr('rainParticleShape', ln='rgbPP', dt='vectorArray' );
 		c.dynExpression('rainParticleShape', s='rainParticleShape.rgbPP = <<0, 0, 1.0>>', c=1);
 		c.select(cl=True);
+		c.setAttr("particleCloud1.color", 1, 1, 1, type="double3"); #instead of particleCloud1?
+		#sets the collision event and particle spawning
+		c.particle( name='rainCollisionParticle' , inherit=True);
+		c.connectDynamic('rainCollisionParticle',f='rainGravity');
+		c.select(cl=True);
+		c.setAttr( "rainCollisionParticle|rainCollisionParticleShape.particleRenderType", 6); # rainParticleShape/render Attributes
+		c.setAttr('rainCollisionParticle.inheritFactor', 1);
+		c.event( 'rainParticle', em=2, die=True, target='rainCollisionParticle', spread=0.5, random=True, count=0, name='rainParticleCollideEvent' );
 		
 	def remove(WeatherUI,self):
 		c.delete('rainEmitter','rainGravity','rainParticle');
