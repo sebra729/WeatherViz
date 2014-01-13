@@ -90,13 +90,21 @@ class WeatherUI():
 		#ground = c.polyPlane(h=100,w=100, n='groundPlane');
 		#c.move(0,-13, 0, 'groundPlane');
 		
+		#C:/Users/Sebastian/Documents/maya/projects/default/sourceimages/exr/Location_1_1_hdr.exr
+		#
+		if not (c.pluginInfo("Mayatomr",q=True,loaded=True)):
+			c.loadPlugin("Mayatomr")
+		else:
+			pass
 		
+		mel.eval('miCreateDefaultNodes()');
 		
+		c.select(cl=True);
 		mel.eval('setCurrentRenderer mentalRay;');
 		ibl = c.createNode( 'mentalrayIblShape', n='myIbl' );
 		c.rename('mentalrayIbl1', 'myIblShape');
-		c.evalDeferred( "c.connectAttr(  ibl+'.message', 'mentalrayGlobals.imageBasedLighting', f=True)", lp=True);
-		mel.eval('$path = "C:/Users/Sebastian/Documents/maya/projects/default/sourceimages/exr/Location_1_1_hdr.exr"');
+		c.evalDeferred( "c.connectAttr(  'myIbl.message', 'mentalrayGlobals.imageBasedLighting', f=True)", lp=True);
+		mel.eval('$path = "C:/Users/Philip/Desktop/SKOLA/TNCG14/projekt/sIBL/Location_1_1_hdr.exr"');
 		mel.eval('AEassignFilenameCB  myIbl.texture $path "image"');
 		c.setAttr('myIbl.colorGain', 14, 14, 14, type='double3');
 		#sets render stats
@@ -108,11 +116,11 @@ class WeatherUI():
 		c.setAttr('myIblShape.scaleX', 80);
 		c.setAttr('myIblShape.scaleY', 80);
 		c.setAttr('myIblShape.scaleZ', 80);
-		
+		c.select(cl=True);
 		ground = c.polyPlane(h=100,w=120, n='groundPlane');
 		c.move(37,-13, -15, 'groundPlane');
 		c.rotate(0, -20, -5,'groundPlane');
-
+		
 		
 		alphaShader = c.shadingNode('lambert', asShader=True, n='alphaShader');
 		SG2 = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=alphaShader+"SG2");
