@@ -1,8 +1,10 @@
 import sys
+import os.path
 import maya.OpenMaya as OpenMaya;
 import maya.OpenMayaMPx as OpenMayaMPx;
 import maya.cmds as c;
 import maya.mel as mel;
+
 
 kPluginCmdName = "WeatherViz"
 
@@ -44,8 +46,94 @@ def uninitializePlugin(mobject):
 		sys.stderr.write( 'Failed to unregister command: %s\n' % kPluginCmdName );
 		
 		
+def _setUpIBL():
+	
+		if not c.objExists('myIbl') and not c.objExists('myIblShape'):
+			mel.eval('miCreateDefaultNodes()');
+			
+			c.select(cl=True);
+			mel.eval('setCurrentRenderer mentalRay;');
+			ibl = c.createNode( 'mentalrayIblShape', n='myIbl' );
+			c.rename('mentalrayIbl1', 'myIblShape');
+			if(c.isConnected( 'myIbl.message', 'mentalrayGlobals.imageBasedLighting' ) != '0'):
+				c.evalDeferred( "c.connectAttr(  'myIbl.message', 'mentalrayGlobals.imageBasedLighting', f=True)", lp=True);
+			mel.eval('$path = `optionVar -q WeatherViz_HDR_Path`');
+			#mel.eval('$path = optionVar -q "WeatherViz_HDR_Path"');
+			mel.eval('AEassignFilenameCB  myIbl.texture $path "image"');
+			c.setAttr('myIbl.colorGain', 14, 14, 14, type='double3');
+			#sets render stats
+			c.setAttr('myIbl.visibleInEnvironment', 1);
+			c.setAttr('myIbl.visibleInReflections', 1);
+			c.setAttr('myIbl.visibleInRefractions', 1);
+			c.setAttr('myIbl.visibleInFinalGather', 1);
+
+			c.setAttr('myIblShape.scaleX', 80);
+			c.setAttr('myIblShape.scaleY', 80);
+			c.setAttr('myIblShape.scaleZ', 80);
+			c.select(cl=True);
+		else:
+			mel.eval('$path = `optionVar -q WeatherViz_HDR_Path`');
+			mel.eval('AEassignFilenameCB  myIbl.texture $path "image"');
+			
+			
+
+def _setHDRPathOptionVar():
+	"""
+	This definition sets **sIBL_GUI_loaderScriptPath** optionVar.
+	"""
+	
+	_setOptionVar("WeatherViz_HDR_Path", c.textField("WeatherViz_HDR_Path_textField", query=True, text=True))
+	
+	
+def _WeatherViz_HDR_Path_button__command(state=None):
+	"""
+	This definition is triggered by **Loader_Script_Path_button** widget.
+
+	:param state: Button state. ( Boolean )
+	"""
+
+	fileName = c.fileDialog2(ds=2, fileFilter="All Files (*.*)", fm=4)
+	fileName = fileName and fileName[0] or None
+	if not fileName:
+		print "noooo filenamaaa "
+		return
 		
+	
+	c.textField("WeatherViz_HDR_Path_textField", edit=True, text=fileName)
+	print "ska satt text " + fileName;
+	_setHDRPathOptionVar()
+	_setUpIBL();
+	
+def _WeatherViz_HDR_Path_textField__changeCommand(value):
+	"""
+	This definition is triggered by **_Loader_Script_Path_textField** widget.
+
+	:param value: Value. ( String )
+	"""
+
+	if os.path.exists(value):
+		_setHDRPathOptionVar()
+		setUpIBL();
+	else:
+		mel.eval("warning(\"WeatherViz | hdr path invalid!\");")
+	
+	
+def _setOptionVar(name, value):
+	"""
+	This definition stores given optionVar with given value.
+	
+	:param name: OptionVar name. ( String )
+	:param value: OptionVar value. ( Object )
+	"""
+
+	c.optionVar(sv=(name, value))
+##end global
+
+	
 class WeatherUI():
+		
+	
+
 		
 	def __init__(self):
 		self.snow = Snow();
@@ -71,7 +159,16 @@ class WeatherUI():
 		c.floatSliderGrp('airMxdSlider',label='Wind Distance', field=True, value=20, dc=self.slider_drag_callback, min=0, max=100, en=False);
 		#c.formLayout(form, edit=True, attachPosition=[(s1, 'top', 20, 1)]);
 		#c.formLayout(form, edit=True, attachPosition=[(s2, 'top', 20, 1)]);
+		
+		c.textField("WeatherViz_HDR_Path_textField", cc=_WeatherViz_HDR_Path_textField__changeCommand)
+		c.button("WeatherViz_HDR_Path_button", label="...", al="center", command=_WeatherViz_HDR_Path_button__command)
+		
+		WeatherViz_HDR_Path = c.optionVar(q="WeatherViz_HDR_Path")
+		if WeatherViz_HDR_Path:
+			c.textField("WeatherViz_HDR_Path_textField", edit=True, text=WeatherViz_HDR_Path)
+			
 		c.showWindow(window);
+		c.windowPref(enableAll=True)
 		
 	def setUpModel(self):
 		#c.file('C:/Users/Sebastian/Documents/maya/projects/default/data/Cobblestones3/Files/untitled.fbx', type='FBX', ra=True, mergeNamespacesOnClash=False, namespace='untitled', options='fbx',  i=True);	
@@ -97,26 +194,26 @@ class WeatherUI():
 		else:
 			pass
 		
-		mel.eval('miCreateDefaultNodes()');
-		
-		c.select(cl=True);
-		mel.eval('setCurrentRenderer mentalRay;');
-		ibl = c.createNode( 'mentalrayIblShape', n='myIbl' );
-		c.rename('mentalrayIbl1', 'myIblShape');
-		c.evalDeferred( "c.connectAttr(  'myIbl.message', 'mentalrayGlobals.imageBasedLighting', f=True)", lp=True);
-		mel.eval('$path = "C:/Users/Philip/Desktop/SKOLA/TNCG14/projekt/sIBL/Location_1_1_hdr.exr"');
-		mel.eval('AEassignFilenameCB  myIbl.texture $path "image"');
-		c.setAttr('myIbl.colorGain', 14, 14, 14, type='double3');
-		#sets render stats
-		c.setAttr('myIbl.visibleInEnvironment', 1);
-		c.setAttr('myIbl.visibleInReflections', 1);
-		c.setAttr('myIbl.visibleInRefractions', 1);
-		c.setAttr('myIbl.visibleInFinalGather', 1);
+		"""
+			To load the hdr image from path
+		"""
+		HDR_Path = c.optionVar(q="WeatherViz_HDR_Path")
+		if HDR_Path:
+			if os.path.exists(HDR_Path):
+				print HDR_Path;
+				_setUpIBL();
 
-		c.setAttr('myIblShape.scaleX', 80);
-		c.setAttr('myIblShape.scaleY', 80);
-		c.setAttr('myIblShape.scaleZ', 80);
-		c.select(cl=True);
+				return True
+			else:
+				mel.eval("error(\"WeatherViz | hdr image doesnt exist!\");")
+		else:
+			mel.eval("warning(\"WeatherViz | No hdr image found!\");")
+			#c.confirmDialog(title="sIBL_GUI | Warning", message="No Loader Script found!\nPlease define one in preferences!", button=["Ok"], defaultButton="Ok")
+		
+		
+		
+		
+		
 		ground = c.polyPlane(h=100,w=120, n='groundPlane');
 		c.move(37,-13, -15, 'groundPlane');
 		c.rotate(0, -20, -5,'groundPlane');
@@ -128,6 +225,10 @@ class WeatherUI():
 		c.select( 'groundPlane' );
 		c.hyperShade( assign=alphaShader);
 		
+	
+	
+	
+	
 	def setUpCamera(self):
 		c.camera(p=[-16,10, -33], rot=[-10,255,0], fl=20);
 		
@@ -160,7 +261,9 @@ class WeatherUI():
 			value2 = c.floatSliderGrp('airMSlider', query=True, value=True);
 			value3 = c.floatSliderGrp('airMxdSlider', query=True, value=True);
 			c.air('air', e=True, m=value2, mxd=value3);
-			
+		
+		
+
 			
 class Snow():
 	
