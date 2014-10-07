@@ -184,11 +184,15 @@ class WeatherUI():
 		#c.setAttr(img+'.hdrMapping', 2);
 		#c.setAttr(img+'.hdrExposure', 3);
 		
-		#ground = c.polyPlane(h=100,w=100, n='groundPlane');
-		#c.move(0,-13, 0, 'groundPlane');
-		
-		#C:/Users/Sebastian/Documents/maya/projects/default/sourceimages/exr/Location_1_1_hdr.exr
-		#
+		ground = c.polyPlane(h=100,w=120, n='groundPlane');
+		c.move(37,-13, -15, 'groundPlane');
+		c.rotate(0, -20, -5,'groundPlane');
+		alphaShader = c.shadingNode('lambert', asShader=True, n='alphaShader')
+		SG2 = c.sets(empty=True, renderable=True, noSurfaceShader=True, name=alphaShader+"SG2");
+ 		c.setAttr(alphaShader+'.transparency', 1, 1, 1, type="double3");
+ 		c.select( 'groundPlane' );
+ 		c.hyperShade( assign=alphaShader);
+
 		if not (c.pluginInfo("Mayatomr",q=True,loaded=True)):
 			c.loadPlugin("Mayatomr")
 		else:
